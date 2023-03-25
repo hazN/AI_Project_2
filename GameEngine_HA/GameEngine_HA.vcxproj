@@ -254,6 +254,12 @@
     <Text Include="imgui\imGuIZMO.quat\license.txt" />
     <Text Include="imgui\LICENSE.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\GameEngine_HA_AI_2\GameEngine_HA\testmap.bmp" />
+    <Image Include="..\..\GameEngine_HA_AI_2\GameEngine_HA\testmap32.bmp" />
+    <Image Include="testmap.bmp" />
+    <Image Include="testmap32.bmp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

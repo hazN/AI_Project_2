@@ -53,7 +53,7 @@ void PathFinder::CreatePathNode(Coord coord, const glm::vec3& position, char nam
 	newPathNode->id = m_Graph.nodes.size();
 	//m_Graph.nodes.emplace(newPathNode);
 	m_Graph.nodes.emplace(coord, newPathNode);
-
+a
 	//GameObject* ball = GDP_CreateGameObject();
 	//ball->Position = position;
 	//ball->Scale = glm::vec3(0.5f);

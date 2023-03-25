@@ -15,11 +15,15 @@ struct Coord
 	int y;
 	bool operator== (const Coord& rhs) const
 	{
-		return this->x == rhs.x && this->y == rhs.y;
+		if (this->x != rhs.x)
+			return false;
+		if (this->y != rhs.y)
+			return false;
+		return true;
 	}
 	bool operator< (const Coord& rhs) const
 	{
-		return this->x < rhs.x && this->y < rhs.y;
+		return this->x < rhs.x || (this->x == rhs.x && this->y < rhs.y);
 	}
 };
 struct PathNode
