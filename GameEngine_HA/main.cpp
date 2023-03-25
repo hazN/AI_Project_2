@@ -440,7 +440,7 @@ int main(int argc, char* argv[])
 	//	= glm::vec4(1.0f, 1.0f, 1.0f, 1000.0f);
 	// Make it REALY transparent
 	//pTerrain->RGBA_colour.w = 1.f;
-	pTerrain->position = glm::vec3(-500.f, -2.f, 500.f);
+	pTerrain->position = glm::vec3(-500.f, -10.f, 500.f);
 	pTerrain->setRotationFromEuler(glm::vec3(4.7, 0, 0));
 	pTerrain->isWireframe = false;
 	pTerrain->SetUniformScale(5);

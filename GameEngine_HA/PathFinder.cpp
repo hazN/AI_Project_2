@@ -69,10 +69,12 @@ void PathFinder::CreatePathNode(Coord coord, const glm::vec3& position, char nam
     m_Graph.nodes.emplace(coord, newPathNode);
 }
 
-// Manhattan distance
-// Get distance between two coords
+// Euclidean distance
+// Get distance between two, using this over manhattan since manhattan doesn't take diagonals into account
 int getDistance(Coord a, Coord b) {
-	return abs(a.x - b.x) + abs(a.y - b.y);
+    int dx = abs(a.x - b.x);
+    int dy = abs(a.y - b.y);
+    return sqrt(dx * dx + dy * dy);
 }
 //https://www.geeksforgeeks.org/a-search-algorithm/
 std::vector<PathNode*> PathFinder::AStarSearch(Graph* graph, PathNode* start, PathNode* end)
@@ -106,6 +108,9 @@ std::vector<PathNode*> PathFinder::AStarSearch(Graph* graph, PathNode* start, Pa
                 rPath.push_back(curNode);
                 curNode = curNode->parent;
             }
+            // Reset start/finish colours incase they got changed
+           // m_StartNode->mesh->RGBA_colour = glm::vec4(0.f, 1.f, 0.f, 1.f);
+            m_EndNode->mesh->RGBA_colour = glm::vec4(1.f, 0.f, 0.f, 1.f);
             // Reverse the order so it's start to finish
             std::vector<PathNode*> path(rPath.rbegin(), rPath.rend());
             return path;
