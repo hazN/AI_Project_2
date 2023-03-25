@@ -9,6 +9,7 @@
 #include "cMeshObject.h"
 #include <map>
 
+
 struct Coord
 {
 	int x;
@@ -37,6 +38,7 @@ struct PathNode
 	glm::vec3 point;
 	Coord coord;
 	PathNode* parent;
+	cMeshObject* mesh;
 	int id;
 	char name;
 	float distanceFromStart = 0;
@@ -59,6 +61,16 @@ struct PathNode
 	}
 	PathNode() : name(' ') {}
 };
+
+struct ComparePathNode
+{
+public:
+	bool operator()(PathNode* a, PathNode* b)
+	{
+		return  a->totalDistance() > b->totalDistance();
+	}
+};
+
 struct Graph
 {
 	//PathNode* AddNode();
@@ -74,6 +86,7 @@ class PathFinder
 {
 public:
 	void CreatePathNode(Coord coord, const glm::vec3& position, char name);
+	void CreatePathNode(Coord coord, const glm::vec3& position, char name, cMeshObject* mesh);
 	//void RenderConnection(PathNode* a, PathNode* b);
 	//void DrawLine(const glm::vec3& a, const glm::vec3& b, const glm::vec3& color);
 	std::vector<PathNode*> AStarSearch(Graph* graph, PathNode* start, PathNode* end);

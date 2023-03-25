@@ -654,8 +654,10 @@ int main(int argc, char* argv[])
 	{
 		for (size_t j = 0; j < navMap[i].size(); j++)
 		{
+			cMeshObject* pBlock = new cMeshObject();
+
 			if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j }) == pathfinder->m_Graph.nodes.end()) {
-				pathfinder->CreatePathNode(Coord{(int)i, (int)j}, glm::vec3(i, 5.f, j), i + j);
+				pathfinder->CreatePathNode(Coord{(int)i, (int)j}, glm::vec3(i, 5.f, j), i + j, pBlock);
 			}
 			// Check top left neighbor
 			if (i != 0 && j != 0)
@@ -667,7 +669,7 @@ int main(int argc, char* argv[])
 					if (navMap[i][j - 1] != 'b' && navMap[i - 1][j] != 'b')
 					{
 						if (pathfinder->m_Graph.nodes.find(Coord{ (int)i - 1,(int)j - 1 }) == pathfinder->m_Graph.nodes.end()) {
-							pathfinder->CreatePathNode(Coord{ (int)i - 1,(int)j - 1 }, glm::vec3(i - 1, 5.f, j - 1), i - 1 + j - 1);
+							pathfinder->CreatePathNode(Coord{ (int)i - 1,(int)j - 1 }, glm::vec3(i - 1, 5.f, j - 1), i - 1 + j - 1, pBlock);
 						}
 						pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i - 1,(int)j - 1 });
 					}
@@ -680,7 +682,7 @@ int main(int argc, char* argv[])
 				if (navMap[i - 1][j] != 'b')
 				{
 					if (pathfinder->m_Graph.nodes.find(Coord{ (int)i - 1,(int)j }) == pathfinder->m_Graph.nodes.end()) {
-						pathfinder->CreatePathNode(Coord{ (int)i - 1,(int)j }, glm::vec3(i - 1, 5.f, j), i - 1 + j);
+						pathfinder->CreatePathNode(Coord{ (int)i - 1,(int)j }, glm::vec3(i - 1, 5.f, j), i - 1 + j, pBlock);
 					}
 					pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i - 1,(int)j });
 				}
@@ -695,7 +697,7 @@ int main(int argc, char* argv[])
 					if (navMap[i - 1][j] != 'b' && navMap[i][j + 1] != 'b')
 					{
 						if (pathfinder->m_Graph.nodes.find(Coord{ (int)i - 1,(int)j + 1 }) == pathfinder->m_Graph.nodes.end()) {
-							pathfinder->CreatePathNode(Coord{ (int)i - 1,(int)j + 1 }, glm::vec3(i - 1, 5.f, j + 1), i - 1 + j + 1);
+							pathfinder->CreatePathNode(Coord{ (int)i - 1,(int)j + 1 }, glm::vec3(i - 1, 5.f, j + 1), i - 1 + j + 1, pBlock);
 						}
 						pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i - 1,(int)j + 1 });
 					}
@@ -708,7 +710,7 @@ int main(int argc, char* argv[])
 				if (navMap[i][j - 1] != 'b')
 				{
 					if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j - 1 }) == pathfinder->m_Graph.nodes.end()) {
-						pathfinder->CreatePathNode(Coord{ (int)i,(int)j - 1 }, glm::vec3(i, 5.f, j - 1), i + j - 1);
+						pathfinder->CreatePathNode(Coord{ (int)i,(int)j - 1 }, glm::vec3(i, 5.f, j - 1), i + j - 1, pBlock);
 					}
 					pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i,(int)j - 1 });
 				}
@@ -720,7 +722,7 @@ int main(int argc, char* argv[])
 				if (navMap[i][j + 1] != 'b')
 				{
 					if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j + 1 }) == pathfinder->m_Graph.nodes.end()) {
-						pathfinder->CreatePathNode(Coord{ (int)i,(int)j + 1 }, glm::vec3(i, 5.f, j + 1), i + j + 1);
+						pathfinder->CreatePathNode(Coord{ (int)i,(int)j + 1 }, glm::vec3(i, 5.f, j + 1), i + j + 1, pBlock);
 					}
 					pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i,(int)j + 1 });
 				}
@@ -735,7 +737,7 @@ int main(int argc, char* argv[])
 					if (navMap[i][j - 1] != 'b' && navMap[i + 1][j] != 'b')
 					{
 						if (pathfinder->m_Graph.nodes.find(Coord{ (int)i + 1,(int)j - 1 }) == pathfinder->m_Graph.nodes.end()) {
-							pathfinder->CreatePathNode(Coord{ (int)i + 1,(int)j - 1 }, glm::vec3(i + 1, 5.f, j - 1), i + 1 + j - 1);
+							pathfinder->CreatePathNode(Coord{ (int)i + 1,(int)j - 1 }, glm::vec3(i + 1, 5.f, j - 1), i + 1 + j - 1, pBlock);
 						}
 						pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i + 1,(int)j - 1 });
 					}
@@ -748,7 +750,7 @@ int main(int argc, char* argv[])
 				if (navMap[i + 1][j] != 'b')
 				{
 					if (pathfinder->m_Graph.nodes.find(Coord{ (int)i + 1,(int)j }) == pathfinder->m_Graph.nodes.end()) {
-						pathfinder->CreatePathNode(Coord{ (int)i + 1,(int)j }, glm::vec3(i + 1, 5.f, j), i + 1 + j);
+						pathfinder->CreatePathNode(Coord{ (int)i + 1,(int)j }, glm::vec3(i + 1, 5.f, j), i + 1 + j, pBlock);
 					}
 					pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i + 1,(int)j });
 				}
@@ -763,13 +765,12 @@ int main(int argc, char* argv[])
 					if (navMap[i][j + 1] != 'b' && navMap[i + 1][j] != 'b')
 					{
 						if (pathfinder->m_Graph.nodes.find(Coord{ (int)i + 1,(int)j + 1 }) == pathfinder->m_Graph.nodes.end()) {
-							pathfinder->CreatePathNode(Coord{ (int)i + 1,(int)j + 1 }, glm::vec3(i + 1, 5.f, j + 1), i + 1 + j + 1);
+							pathfinder->CreatePathNode(Coord{ (int)i + 1,(int)j + 1 }, glm::vec3(i + 1, 5.f, j + 1), i + 1 + j + 1, pBlock);
 						}
 						pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i + 1,(int)j + 1 });
 					}
 				}
 			}
-			cMeshObject* pBlock = new cMeshObject();
 			pBlock->meshName = "Cube";
 			pBlock->friendlyName = "Wall";
 			pBlock->bUse_RGBA_colour = false;      // Use file colours    pTerrain->RGBA_colour = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f)
@@ -789,7 +790,7 @@ int main(int argc, char* argv[])
 				pBlock->position = glm::vec3(i, 0.f, j);
 				pBlock->RGBA_colour = glm::vec4(0.f, 1.f, 0.f, 1.f);
 				if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j }) == pathfinder->m_Graph.nodes.end()) {
-						pathfinder->CreatePathNode(Coord{ (int)i,(int)j }, glm::vec3(i, 5.f, j), i + j);
+						pathfinder->CreatePathNode(Coord{ (int)i,(int)j }, glm::vec3(i, 5.f, j), i + j, pBlock);
 				}
 				pathfinder->m_StartNode = pathfinder->m_Graph.nodes[Coord{(int)i,(int)j}];
 			}
@@ -799,7 +800,7 @@ int main(int argc, char* argv[])
 				pBlock->position = glm::vec3(i, 0.f, j);
 				pBlock->RGBA_colour = glm::vec4(1.f, 0.f, 0.f, 1.f);
 				if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j }) == pathfinder->m_Graph.nodes.end()) {
-					pathfinder->CreatePathNode(Coord{ (int)i,(int)j }, glm::vec3(i, 5.f, j), i + j);
+					pathfinder->CreatePathNode(Coord{ (int)i,(int)j }, glm::vec3(i, 5.f, j), i + j, pBlock);
 				}
 				pathfinder->m_EndNode = pathfinder->m_Graph.nodes[Coord{ (int)i,(int)j }];
 			}
@@ -810,11 +811,14 @@ int main(int argc, char* argv[])
 			g_pMeshObjects.push_back(pBlock);
 		}
 	}
-	//for (auto var : pathfinder->m_Graph.nodes)
-	//{
-	//	std::cout << var.first.x << ", " << var.first.y << " : " << var.second->id << " - " << navMap[var.first.x][var.first.y] << std::endl;
-	//}
+
 	std::vector<PathNode*> path = pathfinder->AStarSearch(&pathfinder->m_Graph, pathfinder->m_StartNode, pathfinder->m_EndNode);
+	int ix = 0;
+	for (PathNode* p : path)
+	{
+		ix++;
+		std::cout << ix << ": " << p->coord.x << ", " << p->coord.y << std::endl;
+	}
 	while (!glfwWindowShouldClose(window))
 	{
 
