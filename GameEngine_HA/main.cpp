@@ -710,7 +710,7 @@ int main(int argc, char* argv[])
 					if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j - 1 }) == pathfinder->m_Graph.nodes.end()) {
 						pathfinder->CreatePathNode(Coord{ (int)i,(int)j - 1 }, glm::vec3(i, 5.f, j - 1), i + j - 1);
 					}
-					pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i,(int)j + 1 });
+					pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i,(int)j - 1 });
 				}
 			}
 			// Check right neighbor
@@ -788,12 +788,20 @@ int main(int argc, char* argv[])
 				pBlock->bUse_RGBA_colour = true;
 				pBlock->position = glm::vec3(i, 0.f, j);
 				pBlock->RGBA_colour = glm::vec4(0.f, 1.f, 0.f, 1.f);
+				if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j }) == pathfinder->m_Graph.nodes.end()) {
+						pathfinder->CreatePathNode(Coord{ (int)i,(int)j }, glm::vec3(i, 5.f, j), i + j);
+				}
+				pathfinder->m_StartNode = pathfinder->m_Graph.nodes[Coord{(int)i,(int)j}];
 			}
 			else if (navMap[i][j] == 'r')
 			{
 				pBlock->bUse_RGBA_colour = true;
 				pBlock->position = glm::vec3(i, 0.f, j);
 				pBlock->RGBA_colour = glm::vec4(1.f, 0.f, 0.f, 1.f);
+				if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j }) == pathfinder->m_Graph.nodes.end()) {
+					pathfinder->CreatePathNode(Coord{ (int)i,(int)j }, glm::vec3(i, 5.f, j), i + j);
+				}
+				pathfinder->m_EndNode = pathfinder->m_Graph.nodes[Coord{ (int)i,(int)j }];
 			}
 			pBlock->setRotationFromEuler(glm::vec3(0));
 			pBlock->isWireframe = false;
@@ -802,12 +810,14 @@ int main(int argc, char* argv[])
 			g_pMeshObjects.push_back(pBlock);
 		}
 	}
-	for (auto var : pathfinder->m_Graph.nodes)
-	{
-		std::cout << var.first.x << ", " << var.first.y << " : " << var.second->id << " - " << navMap[var.first.x][var.first.y] << std::endl;
-	}
+	//for (auto var : pathfinder->m_Graph.nodes)
+	//{
+	//	std::cout << var.first.x << ", " << var.first.y << " : " << var.second->id << " - " << navMap[var.first.x][var.first.y] << std::endl;
+	//}
+	pathfinder->AStarSearch(&pathfinder->m_Graph, pathfinder->m_StartNode, pathfinder->m_EndNode);
 	while (!glfwWindowShouldClose(window))
 	{
+
 		::g_pTheLightManager->CopyLightInformationToShader(shaderID);
 		//	pBrain->Update(0.1f);
 		duration = (std::clock() - deltaTime) / (double)CLOCKS_PER_SEC;

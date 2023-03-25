@@ -38,11 +38,11 @@ void Graph::SetNeighbours(Coord a, Coord b)
 			nodes.at(a)->neighbours.push_back(node.second);
 			//nodes[a]->neighbours.push_back(node.second);
 		}
-		if (node.second->coord == a)
-		{
-			nodes.at(b)->neighbours.push_back(node.second);
-			//nodes[b]->neighbours.push_back(node.second);
-		}
+		//if (node.second->coord == a)
+		//{
+		//	nodes.at(b)->neighbours.push_back(node.second);
+		//	//nodes[b]->neighbours.push_back(node.second);
+		//}
 	}
 }
 
@@ -52,8 +52,9 @@ void PathFinder::CreatePathNode(Coord coord, const glm::vec3& position, char nam
 	newPathNode->point = position;
 	newPathNode->id = m_Graph.nodes.size();
 	//m_Graph.nodes.emplace(newPathNode);
+	newPathNode->coord = coord;
 	m_Graph.nodes.emplace(coord, newPathNode);
-a
+
 	//GameObject* ball = GDP_CreateGameObject();
 	//ball->Position = position;
 	//ball->Scale = glm::vec3(0.5f);
