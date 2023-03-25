@@ -814,7 +814,7 @@ int main(int argc, char* argv[])
 	//{
 	//	std::cout << var.first.x << ", " << var.first.y << " : " << var.second->id << " - " << navMap[var.first.x][var.first.y] << std::endl;
 	//}
-	pathfinder->AStarSearch(&pathfinder->m_Graph, pathfinder->m_StartNode, pathfinder->m_EndNode);
+	std::vector<PathNode*> path = pathfinder->AStarSearch(&pathfinder->m_Graph, pathfinder->m_StartNode, pathfinder->m_EndNode);
 	while (!glfwWindowShouldClose(window))
 	{
 

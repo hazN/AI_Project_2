@@ -1,4 +1,7 @@
 #include "PathFinder.h"
+#include <iostream>
+#include <queue>
+#include <unordered_map>
 
 void PrintSet(const std::string& name, const std::vector<PathNode*>& set)
 {
@@ -64,56 +67,116 @@ void PathFinder::CreatePathNode(Coord coord, const glm::vec3& position, char nam
 	//m_PathNodeGameObjects.push_back(ball);
 }
 
-bool PathFinder::AStarSearch(Graph* graph, PathNode* start, PathNode* end)
-{
-	//priority_queue<PathNode*, std::vector<PathNode*>, PathNode> open;
-	std::vector<PathNode*> open;
-	std::vector<PathNode*> closed;
+//bool PathFinder::AStarSearch(Graph* graph, PathNode* start, PathNode* end)
+//{
+//	//priority_queue<PathNode*, std::vector<PathNode*>, PathNode> open;
+//	std::vector<PathNode*> open;
+//	std::vector<PathNode*> closed;
+//
+//	open.push_back(start);
+//	printf("Added %c to the open set!\n", start->name);
+//	while (!open.empty())
+//	{
+//		PrintSet("open:   ", open);
+//		PrintSet("closed: ", closed);
+//
+//		std::vector<PathNode*>::iterator itX = GetPathNodeWithShortestDistanceFromStart(open);
+//		PathNode* X = *itX;
+//		open.erase(itX);
+//
+//		printf("Removed %c from the open set!\n", X->name);
+//
+//		if (X == end)
+//			return true;
+//
+//		closed.push_back(X);
+//		printf("Added %c to the closed set!\n", X->name);
+//
+//		printf("%c has %d neighbors!\n", X->name, (int)X->neighbours.size());
+//		for (int i = 0; i < X->neighbours.size(); i++)
+//		{
+//			PathNode* n = X->neighbours[i];
+//			printf("Found neighbour %c!\n", n->name);
+//			if (std::find(closed.begin(), closed.end(), n) == closed.end())
+//			{
+//				continue;
+//			}
+//			if (std::find(open.begin(), open.end(), n) != open.end())
+//			{
+//				// Distance from n to it's parent + distance from parent to start
+//				float distanceFromStartToN = glm::distance(n->point, X->point) + X->distanceFromStart;
+//				if (distanceFromStartToN < n->distanceFromStart)
+//				{
+//					n->parent = X;
+//					n->distanceFromStart = distanceFromStartToN;
+//				}
+//			}
+//			else
+//			{
+//				open.insert(open.begin(), n);
+//				n->parent = X;
+//				printf("Added %c to the open set!\n", n->name);
+//			}
+//		}
+//	}
+//}
+// 
 
-	open.push_back(start);
-	printf("Added %c to the open set!\n", start->name);
+// Manhattan distance
+// Get distance between two coords
+int getDistance(Coord a, Coord b) {
+	return abs(a.x - b.x) + abs(a.y - b.y);
+}
+//https://www.geeksforgeeks.org/a-search-algorithm/
+std::vector<PathNode*> PathFinder::AStarSearch(Graph* graph, PathNode* start, PathNode* end)
+{
+	// Open and closed sets
+	std::priority_queue<PathNode*> open;
+	std::map<Coord, PathNode*> closed;
+
+	// Add the start node
+	open.push(start);
+
+	// Loop until end is found
 	while (!open.empty())
 	{
-		PrintSet("open:   ", open);
-		PrintSet("closed: ", closed);
-
-		std::vector<PathNode*>::iterator itX = GetPathNodeWithShortestDistanceFromStart(open);
-		PathNode* X = *itX;
-		open.erase(itX);
-
-		printf("Removed %c from the open set!\n", X->name);
-
-		if (X == end)
-			return true;
-
-		closed.push_back(X);
-		printf("Added %c to the closed set!\n", X->name);
-
-		printf("%c has %d neighbors!\n", X->name, (int)X->neighbours.size());
-		for (int i = 0; i < X->neighbours.size(); i++)
+		// Pop lowest distance node
+		PathNode* curNode = open.top();
+		open.pop();
+		// Check if it has reached the end
+		if (curNode == m_EndNode)
 		{
-			PathNode* n = X->neighbours[i];
-			printf("Found neighbour %c!\n", n->name);
-			if (std::find(closed.begin(), closed.end(), n) == closed.end())
+			// Create the path for the agent to follow
+			std::vector<PathNode*> rPath;
+			while (curNode != NULL)
+			{
+				rPath.push_back(curNode);
+				curNode = curNode->parent;
+			}
+			// Reverse the order so its start to finish
+			std::vector<PathNode*> path;
+			for (int i = rPath.size() - 1; i != 0; i--)
+			{
+				path.push_back(rPath[i]);
+			}
+			return path;
+		}
+		// Check neighbours 
+		for (PathNode* neighbour : curNode->neighbours)
+		{
+			// Set it as the child of the current node
+			neighbour->parent = curNode;
+			// Calculate distance from start and finish
+			neighbour->distanceFromStart = getDistance(neighbour->coord, m_StartNode->coord);
+			neighbour->distanceFromEnd = getDistance(neighbour->coord, m_EndNode->coord);
+			// Check if its in the closed set
+			if (closed.find(neighbour->coord) != closed.end())
 			{
 				continue;
 			}
-			else if (std::find(open.begin(), open.end(), n) != open.end())
-			{
-				// Distance from n to it's parent + distance from parent to start
-				float distanceFromStartToN = glm::distance(n->point, X->point) + X->distanceFromStart;
-				if (distanceFromStartToN < n->distanceFromStart)
-				{
-					n->parent = X;
-					n->distanceFromStart = distanceFromStartToN;
-				}
-			}
-			else
-			{
-				open.insert(open.begin(), n);
-				n->parent = X;
-				printf("Added %c to the open set!\n", n->name);
-			}
+			// Otherwise add it to the open
+			open.push(neighbour);
 		}
+		closed.emplace(curNode->coord, curNode);
 	}
 }

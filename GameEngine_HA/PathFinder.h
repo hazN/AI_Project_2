@@ -39,7 +39,11 @@ struct PathNode
 	PathNode* parent;
 	int id;
 	char name;
-	float distanceFromStart;
+	float distanceFromStart = 0;
+	float distanceFromEnd = 0;
+	int totalDistance() const {
+		return distanceFromStart + distanceFromEnd;
+	}
 	std::vector<PathNode*> neighbours;
 
 	bool operator() (const PathNode* l, const PathNode* r) const 
@@ -48,7 +52,10 @@ struct PathNode
 	}
 	bool operator< (const PathNode& rhs) const
 	{
-		return this->distanceFromStart < rhs.distanceFromStart;
+		return this->totalDistance() > rhs.totalDistance();
+	}
+	bool operator==(const PathNode& rhs) const {
+		return this->coord.x == rhs.coord.x && this->coord.y == rhs.coord.y;
 	}
 	PathNode() : name(' ') {}
 };
@@ -69,7 +76,7 @@ public:
 	void CreatePathNode(Coord coord, const glm::vec3& position, char name);
 	//void RenderConnection(PathNode* a, PathNode* b);
 	//void DrawLine(const glm::vec3& a, const glm::vec3& b, const glm::vec3& color);
-	bool AStarSearch(Graph* graph, PathNode* start, PathNode* end);
+	std::vector<PathNode*> AStarSearch(Graph* graph, PathNode* start, PathNode* end);
 
 	std::vector<PathNode*> m_OpenSet;
 	std::vector<PathNode*> m_ClosedSet;
