@@ -663,12 +663,14 @@ int main(int argc, char* argv[])
 		for (size_t j = 0; j < navMap[i].size(); j++)
 		{
 			cMeshObject* pBlock = new cMeshObject();
-
 		
 			if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j }) == pathfinder->m_Graph.nodes.end()) {
 				pathfinder->CreatePathNode(Coord{(int)i, (int)j}, glm::vec3(i, 5.f, j), i + j, pBlock);
 			}
 			// Check if this is not a wall
+			// i - 1, j - 1 || i - 1, j || i, - 1, j + 1
+			// i, j - 1		|| i, j || i, - 1, j + 1
+			// i + 1, j - 1 || i + 1, j || i + 1, j + 1
 			if (navMap[i][j] != 'b')
 			{
 				// Check top left neighbor
@@ -840,20 +842,6 @@ int main(int argc, char* argv[])
 	end->RGBA_colour = glm::vec4(1.f, 0.f, 0.f, 1.f);
 	while (!glfwWindowShouldClose(window))
 	{
-	/*	if (nodeCount < path.size() - 1)
-		{
-			glm::vec3 direction = glm::normalize(glm::vec3(pathfinder->m_Graph.nodes[path[nodeCount]->coord]->mesh->position.x, pBeholder->position.y, pathfinder->m_Graph.nodes[path[nodeCount]->coord]->mesh->position.z) - pBeholder->position);
-			pBeholder->position += direction / 15.f;
-			float length = glm::length(pBeholder->position - glm::vec3(pathfinder->m_Graph.nodes[path[nodeCount]->coord]->mesh->position.x, pBeholder->position.y, pathfinder->m_Graph.nodes[path[nodeCount]->coord]->mesh->position.y));
-			if (length < 4.1f)
-			{
-				nodeCount++;
-			}
-		}
-		else
-		{
-			pBeholder->position = glm::vec3(path[path.size() -1]->point.x, 1.15f, path[path.size() - 1]->point.y);
-		}*/
 		moveAlongPath(path, pBeholder, SPEED);
 		::g_pTheLightManager->CopyLightInformationToShader(shaderID);
 		//	pBrain->Update(0.1f);
