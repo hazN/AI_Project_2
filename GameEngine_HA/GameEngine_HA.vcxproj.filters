@@ -386,11 +386,5 @@
     <Image Include="testmap.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\GameEngine_HA_AI_2\GameEngine_HA\testmap32.bmp">
-      <Filter>Source Files</Filter>
-    </Image>
-    <Image Include="..\..\GameEngine_HA_AI_2\GameEngine_HA\testmap.bmp">
-      <Filter>Source Files</Filter>
-    </Image>
   </ItemGroup>
 </Project>

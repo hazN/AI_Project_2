@@ -37,7 +37,9 @@
 #include "cBasicTextureManager.h"
 #include "GenerateDungeon.h"
 #include "PathFinder.h"
+#include "quaternion_utils.h"
 unsigned char* ReadBMP(char* filename);
+void moveAlongPath(std::vector<PathNode*>& path, cMeshObject* agent, float speed);
 glm::vec3 g_cameraEye = glm::vec3(0.0, 15, -100.0f);
 glm::vec3 g_cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
 std::vector<std::vector<char>> navMap;
@@ -208,7 +210,7 @@ cMeshObject* pDebugSphere_2 = NULL;// = new cMeshObject();
 cMeshObject* pDebugSphere_3 = NULL;// = new cMeshObject();
 cMeshObject* pDebugSphere_4 = NULL;// = new cMeshObject();
 cMeshObject* pDebugSphere_5 = NULL;// = new cMeshObject();
-
+PathFinder* pathfinder;
 int main(int argc, char* argv[])
 {
 	//srand
@@ -516,18 +518,18 @@ int main(int argc, char* argv[])
 	cMeshObject* pBeholder = new cMeshObject();
 	pBeholder->meshName = "Beholder";
 	pBeholder->friendlyName = "Beholder1";
-	pBeholder->bUse_RGBA_colour = true;      // Use file colours    pTerrain->RGBA_colour = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	pBeholder->bUse_RGBA_colour = false;      // Use file colours    pTerrain->RGBA_colour = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 	pBeholder->specular_colour_and_power = glm::vec4(1.0f, 0.0f, 0.0f, 1000.0f);
 	pBeholder->position = glm::vec3(0);
 	pBeholder->setRotationFromEuler(glm::vec3(0));
 	pBeholder->isWireframe = false;
-	pBeholder->SetUniformScale(10.f);
+	pBeholder->scaleXYZ = glm::vec3(0.25f);
 	pBeholder->textures[0] = "Beholder_Base_color.bmp";
 	pBeholder->textureRatios[0] = 1.0f;
 	pBeholder->textureRatios[1] = 1.0f;
 	pBeholder->textureRatios[2] = 1.0f;
 	pBeholder->textureRatios[3] = 1.0f;
-
+	g_pMeshObjects.push_back(pBeholder);
 	//cMeshObject* pBlock = new cMeshObject();
 	//pBlock->meshName = "Cube";
 	//pBlock->friendlyName = "Wall1";
@@ -648,7 +650,7 @@ int main(int argc, char* argv[])
 	//bool increase = true;
 	int increase = 1;
 	//pVAOManager->Load();
-	PathFinder* pathfinder = new PathFinder();
+	pathfinder = new PathFinder();
 	ReadBMP((char*)"testmap32.bmp");
 	for (size_t i = 0; i < navMap.size(); i++)
 	{
@@ -819,9 +821,26 @@ int main(int argc, char* argv[])
 		ix++;
 		std::cout << ix << ": " << p->coord.x << ", " << p->coord.y << std::endl;
 	}
+	int nodeCount = 0;
+	pBeholder->position = glm::vec3(path[0]->coord.x, 1.15f, path[0]->coord.y);
+	
 	while (!glfwWindowShouldClose(window))
 	{
-
+	/*	if (nodeCount < path.size() - 1)
+		{
+			glm::vec3 direction = glm::normalize(glm::vec3(pathfinder->m_Graph.nodes[path[nodeCount]->coord]->mesh->position.x, pBeholder->position.y, pathfinder->m_Graph.nodes[path[nodeCount]->coord]->mesh->position.z) - pBeholder->position);
+			pBeholder->position += direction / 15.f;
+			float length = glm::length(pBeholder->position - glm::vec3(pathfinder->m_Graph.nodes[path[nodeCount]->coord]->mesh->position.x, pBeholder->position.y, pathfinder->m_Graph.nodes[path[nodeCount]->coord]->mesh->position.y));
+			if (length < 4.1f)
+			{
+				nodeCount++;
+			}
+		}
+		else
+		{
+			pBeholder->position = glm::vec3(path[path.size() -1]->point.x, 1.15f, path[path.size() - 1]->point.y);
+		}*/
+		moveAlongPath(path, pBeholder, 0.1f);
 		::g_pTheLightManager->CopyLightInformationToShader(shaderID);
 		//	pBrain->Update(0.1f);
 		duration = (std::clock() - deltaTime) / (double)CLOCKS_PER_SEC;
@@ -1186,12 +1205,42 @@ unsigned char* ReadBMP(char* filename)
 		}
 		navMap.push_back(row);
 	}
-	std::vector<std::vector<char>> temp;
-	for (int i = navMap.size() -1; i != 0; i--)
-	{
-		temp.push_back(navMap[i]);
-	}
-	navMap = temp;
+	//std::vector<std::vector<char>> temp;
+	//for (int i = navMap.size() -1; i != 0; i--)
+	//{
+	//	temp.push_back(navMap[i]);
+	//}
+	//navMap = temp;
 	fclose(f);
 	return data;
+}
+void moveAlongPath(std::vector<PathNode*>& path, cMeshObject* agent, float speed) {
+	static int iNode = 0;
+	static bool moving = false;
+	static glm::vec3 targetPos;
+
+	// Check if we're currently moving
+	if (moving) {
+		glm::vec3 direction = glm::normalize(targetPos - agent->position);
+		agent->position += direction * speed;
+		agent->qRotation = q_utils::RotateTowards(agent->qRotation, q_utils::LookAt(-direction, glm::vec3(0.f, 1.f, 0.f)), 3.14f * 0.05f);
+		// Check if we've reached the target position
+		if (glm::length(targetPos - agent->position) < 0.1f) {
+			moving = false;
+			iNode++;
+		}
+	}
+	else {
+		// Check if the path is empty
+		if (iNode < path.size() - 1) {
+			// Move towards next node
+			targetPos = glm::vec3(path[iNode + 1]->point.x, agent->position.y, path[iNode + 1]->point.z);
+			moving = true;
+		}
+		else {
+			// Stop moving once it's reached the end
+			iNode = 0;
+			moving = false;
+		}
+	}
 }
