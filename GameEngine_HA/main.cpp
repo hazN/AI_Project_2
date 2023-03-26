@@ -38,6 +38,9 @@
 #include "GenerateDungeon.h"
 #include "PathFinder.h"
 #include "quaternion_utils.h"
+
+const char* MAP_FILE_NAME_ = "2ndtestmap32.bmp";
+
 unsigned char* ReadBMP(char* filename);
 void moveAlongPath(std::vector<PathNode*>& path, cMeshObject* agent, float speed);
 glm::vec3 g_cameraEye = glm::vec3(0.0, 15, -100.0f);
@@ -651,7 +654,7 @@ int main(int argc, char* argv[])
 	int increase = 1;
 	//pVAOManager->Load();
 	pathfinder = new PathFinder();
-	ReadBMP((char*)"testmap32.bmp");
+	ReadBMP((char*)MAP_FILE_NAME_);
 	for (size_t i = 0; i < navMap.size(); i++)
 	{
 		for (size_t j = 0; j < navMap[i].size(); j++)
@@ -693,7 +696,7 @@ int main(int argc, char* argv[])
 			if (i != 0 && j < navMap[i].size() - 1)
 			{
 				// Check if its not black aka not a wall
-				if (navMap[i - 1][j] != 'b')
+				if (navMap[i - 1][j + 1] != 'b')
 				{
 					// Make sure there is not a wall blocking this since its a diagonal
 					if (navMap[i - 1][j] != 'b' && navMap[i][j + 1] != 'b')

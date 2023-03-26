@@ -109,9 +109,9 @@ std::vector<PathNode*> PathFinder::AStarSearch(Graph* graph, PathNode* start, Pa
                 curNode = curNode->parent;
             }
             // Reset start/finish colours incase they got changed
-            m_StartNode->mesh->RGBA_colour = glm::vec4(0.f, 1.f, 0.f, 1.f);
            // m_StartNode->mesh->RGBA_colour = glm::vec4(0.f, 1.f, 0.f, 1.f);
-            m_EndNode->mesh->RGBA_colour = glm::vec4(1.f, 0.f, 0.f, 1.f);
+           //// m_StartNode->mesh->RGBA_colour = glm::vec4(0.f, 1.f, 0.f, 1.f);
+           // m_EndNode->mesh->RGBA_colour = glm::vec4(1.f, 0.f, 0.f, 1.f);
             // Reverse the order so it's start to finish
             std::vector<PathNode*> path(rPath.rbegin(), rPath.rend());
             return path;
