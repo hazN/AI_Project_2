@@ -39,7 +39,8 @@
 #include "PathFinder.h"
 #include "quaternion_utils.h"
 
-const char* MAP_FILE_NAME_ = "2ndtestmap32.bmp";
+const char* MAP_FILE_NAME_ = "testmap32.bmp";
+const float SPEED = 0.2f;
 
 unsigned char* ReadBMP(char* filename);
 void moveAlongPath(std::vector<PathNode*>& path, cMeshObject* agent, float speed);
@@ -655,124 +656,131 @@ int main(int argc, char* argv[])
 	//pVAOManager->Load();
 	pathfinder = new PathFinder();
 	ReadBMP((char*)MAP_FILE_NAME_);
+	cMeshObject* start = NULL;
+	cMeshObject* end = NULL;
 	for (size_t i = 0; i < navMap.size(); i++)
 	{
 		for (size_t j = 0; j < navMap[i].size(); j++)
 		{
 			cMeshObject* pBlock = new cMeshObject();
 
+		
 			if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j }) == pathfinder->m_Graph.nodes.end()) {
 				pathfinder->CreatePathNode(Coord{(int)i, (int)j}, glm::vec3(i, 5.f, j), i + j, pBlock);
 			}
-			// Check top left neighbor
-			if (i != 0 && j != 0)
+			// Check if this is not a wall
+			if (navMap[i][j] != 'b')
 			{
-				// Check if its not black aka not a wall
-				if (navMap[i - 1][j - 1] != 'b')
+				// Check top left neighbor
+				if (i != 0 && j != 0)
 				{
-					// Make sure there is not a wall blocking this since its a diagonal
-					if (navMap[i][j - 1] != 'b' && navMap[i - 1][j] != 'b')
+					// Check if its not black aka not a wall
+					if (navMap[i - 1][j - 1] != 'b')
 					{
-						if (pathfinder->m_Graph.nodes.find(Coord{ (int)i - 1,(int)j - 1 }) == pathfinder->m_Graph.nodes.end()) {
-							pathfinder->CreatePathNode(Coord{ (int)i - 1,(int)j - 1 }, glm::vec3(i - 1, 5.f, j - 1), i - 1 + j - 1, pBlock);
+						// Make sure there is not a wall blocking this since its a diagonal
+						if (navMap[i][j - 1] != 'b' && navMap[i - 1][j] != 'b')
+						{
+							if (pathfinder->m_Graph.nodes.find(Coord{ (int)i - 1,(int)j - 1 }) == pathfinder->m_Graph.nodes.end()) {
+								pathfinder->CreatePathNode(Coord{ (int)i - 1,(int)j - 1 }, glm::vec3(i - 1, 5.f, j - 1), i - 1 + j - 1, pBlock);
+							}
+							pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i - 1,(int)j - 1 });
 						}
-						pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i - 1,(int)j - 1 });
 					}
 				}
-			}
-			// Check top neighbor
-			if (i != 0)
-			{
-				// Check if its not black aka not a wall
-				if (navMap[i - 1][j] != 'b')
+				// Check top neighbor
+				if (i != 0)
 				{
-					if (pathfinder->m_Graph.nodes.find(Coord{ (int)i - 1,(int)j }) == pathfinder->m_Graph.nodes.end()) {
-						pathfinder->CreatePathNode(Coord{ (int)i - 1,(int)j }, glm::vec3(i - 1, 5.f, j), i - 1 + j, pBlock);
-					}
-					pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i - 1,(int)j });
-				}
-			}
-			// Check top right neighbor
-			if (i != 0 && j < navMap[i].size() - 1)
-			{
-				// Check if its not black aka not a wall
-				if (navMap[i - 1][j + 1] != 'b')
-				{
-					// Make sure there is not a wall blocking this since its a diagonal
-					if (navMap[i - 1][j] != 'b' && navMap[i][j + 1] != 'b')
+					// Check if its not black aka not a wall
+					if (navMap[i - 1][j] != 'b')
 					{
-						if (pathfinder->m_Graph.nodes.find(Coord{ (int)i - 1,(int)j + 1 }) == pathfinder->m_Graph.nodes.end()) {
-							pathfinder->CreatePathNode(Coord{ (int)i - 1,(int)j + 1 }, glm::vec3(i - 1, 5.f, j + 1), i - 1 + j + 1, pBlock);
+						if (pathfinder->m_Graph.nodes.find(Coord{ (int)i - 1,(int)j }) == pathfinder->m_Graph.nodes.end()) {
+							pathfinder->CreatePathNode(Coord{ (int)i - 1,(int)j }, glm::vec3(i - 1, 5.f, j), i - 1 + j, pBlock);
 						}
-						pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i - 1,(int)j + 1 });
+						pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i - 1,(int)j });
 					}
 				}
-			}
-			// Check left neighbor
-			if (j != 0)
-			{
-				// Check if its not black aka not a wall
-				if (navMap[i][j - 1] != 'b')
+				// Check top right neighbor
+				if (i != 0 && j < navMap[i].size() - 1)
 				{
-					if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j - 1 }) == pathfinder->m_Graph.nodes.end()) {
-						pathfinder->CreatePathNode(Coord{ (int)i,(int)j - 1 }, glm::vec3(i, 5.f, j - 1), i + j - 1, pBlock);
-					}
-					pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i,(int)j - 1 });
-				}
-			}
-			// Check right neighbor
-			if (j < navMap[i].size() - 1)
-			{
-				// Check if its not black aka not a wall
-				if (navMap[i][j + 1] != 'b')
-				{
-					if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j + 1 }) == pathfinder->m_Graph.nodes.end()) {
-						pathfinder->CreatePathNode(Coord{ (int)i,(int)j + 1 }, glm::vec3(i, 5.f, j + 1), i + j + 1, pBlock);
-					}
-					pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i,(int)j + 1 });
-				}
-			}
-			// Check bottom left neighbor
-			if (i < navMap.size() - 1 && j != 0)
-			{
-				// Check if its not black aka not a wall
-				if (navMap[i + 1][j - 1] != 'b')
-				{
-					// Make sure there is not a wall blocking this since its a diagonal
-					if (navMap[i][j - 1] != 'b' && navMap[i + 1][j] != 'b')
+					// Check if its not black aka not a wall
+					if (navMap[i - 1][j + 1] != 'b')
 					{
-						if (pathfinder->m_Graph.nodes.find(Coord{ (int)i + 1,(int)j - 1 }) == pathfinder->m_Graph.nodes.end()) {
-							pathfinder->CreatePathNode(Coord{ (int)i + 1,(int)j - 1 }, glm::vec3(i + 1, 5.f, j - 1), i + 1 + j - 1, pBlock);
+						// Make sure there is not a wall blocking this since its a diagonal
+						if (navMap[i - 1][j] != 'b' && navMap[i][j + 1] != 'b')
+						{
+							if (pathfinder->m_Graph.nodes.find(Coord{ (int)i - 1,(int)j + 1 }) == pathfinder->m_Graph.nodes.end()) {
+								pathfinder->CreatePathNode(Coord{ (int)i - 1,(int)j + 1 }, glm::vec3(i - 1, 5.f, j + 1), i - 1 + j + 1, pBlock);
+							}
+							pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i - 1,(int)j + 1 });
 						}
-						pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i + 1,(int)j - 1 });
 					}
 				}
-			}
-			// Check bottom neighbor
-			if (i < navMap.size() - 1)
-			{
-				// Check if its not black aka not a wall
-				if (navMap[i + 1][j] != 'b')
+				// Check left neighbor
+				if (j != 0)
 				{
-					if (pathfinder->m_Graph.nodes.find(Coord{ (int)i + 1,(int)j }) == pathfinder->m_Graph.nodes.end()) {
-						pathfinder->CreatePathNode(Coord{ (int)i + 1,(int)j }, glm::vec3(i + 1, 5.f, j), i + 1 + j, pBlock);
-					}
-					pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i + 1,(int)j });
-				}
-			}
-			// Check bottom right neighbor
-			if (i < navMap.size() - 1 && j < navMap[i].size() - 1)
-			{
-				// Check if its not black aka not a wall
-				if (navMap[i + 1][j + 1] != 'b')
-				{
-					// Make sure there is not a wall blocking this since its a diagonal
-					if (navMap[i][j + 1] != 'b' && navMap[i + 1][j] != 'b')
+					// Check if its not black aka not a wall
+					if (navMap[i][j - 1] != 'b')
 					{
-						if (pathfinder->m_Graph.nodes.find(Coord{ (int)i + 1,(int)j + 1 }) == pathfinder->m_Graph.nodes.end()) {
-							pathfinder->CreatePathNode(Coord{ (int)i + 1,(int)j + 1 }, glm::vec3(i + 1, 5.f, j + 1), i + 1 + j + 1, pBlock);
+						if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j - 1 }) == pathfinder->m_Graph.nodes.end()) {
+							pathfinder->CreatePathNode(Coord{ (int)i,(int)j - 1 }, glm::vec3(i, 5.f, j - 1), i + j - 1, pBlock);
 						}
-						pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i + 1,(int)j + 1 });
+						pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i,(int)j - 1 });
+					}
+				}
+				// Check right neighbor
+				if (j < navMap[i].size() - 1)
+				{
+					// Check if its not black aka not a wall
+					if (navMap[i][j + 1] != 'b')
+					{
+						if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j + 1 }) == pathfinder->m_Graph.nodes.end()) {
+							pathfinder->CreatePathNode(Coord{ (int)i,(int)j + 1 }, glm::vec3(i, 5.f, j + 1), i + j + 1, pBlock);
+						}
+						pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i,(int)j + 1 });
+					}
+				}
+				// Check bottom left neighbor
+				if (i < navMap.size() - 1 && j != 0)
+				{
+					// Check if its not black aka not a wall
+					if (navMap[i + 1][j - 1] != 'b')
+					{
+						// Make sure there is not a wall blocking this since its a diagonal
+						if (navMap[i][j - 1] != 'b' && navMap[i + 1][j] != 'b')
+						{
+							if (pathfinder->m_Graph.nodes.find(Coord{ (int)i + 1,(int)j - 1 }) == pathfinder->m_Graph.nodes.end()) {
+								pathfinder->CreatePathNode(Coord{ (int)i + 1,(int)j - 1 }, glm::vec3(i + 1, 5.f, j - 1), i + 1 + j - 1, pBlock);
+							}
+							pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i + 1,(int)j - 1 });
+						}
+					}
+				}
+				// Check bottom neighbor
+				if (i < navMap.size() - 1)
+				{
+					// Check if its not black aka not a wall
+					if (navMap[i + 1][j] != 'b')
+					{
+						if (pathfinder->m_Graph.nodes.find(Coord{ (int)i + 1,(int)j }) == pathfinder->m_Graph.nodes.end()) {
+							pathfinder->CreatePathNode(Coord{ (int)i + 1,(int)j }, glm::vec3(i + 1, 5.f, j), i + 1 + j, pBlock);
+						}
+						pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i + 1,(int)j });
+					}
+				}
+				// Check bottom right neighbor
+				if (i < navMap.size() - 1 && j < navMap[i].size() - 1)
+				{
+					// Check if its not black aka not a wall
+					if (navMap[i + 1][j + 1] != 'b')
+					{
+						// Make sure there is not a wall blocking this since its a diagonal
+						if (navMap[i][j + 1] != 'b' && navMap[i + 1][j] != 'b')
+						{
+							if (pathfinder->m_Graph.nodes.find(Coord{ (int)i + 1,(int)j + 1 }) == pathfinder->m_Graph.nodes.end()) {
+								pathfinder->CreatePathNode(Coord{ (int)i + 1,(int)j + 1 }, glm::vec3(i + 1, 5.f, j + 1), i + 1 + j + 1, pBlock);
+							}
+							pathfinder->m_Graph.SetNeighbours(Coord{ (int)i,(int)j }, Coord{ (int)i + 1,(int)j + 1 });
+						}
 					}
 				}
 			}
@@ -791,23 +799,25 @@ int main(int argc, char* argv[])
 			}
 			else if (navMap[i][j] == 'g')
 			{
-				pBlock->bUse_RGBA_colour = true;
 				pBlock->position = glm::vec3(i, 0.f, j);
+				pBlock->bUse_RGBA_colour = true;
 				pBlock->RGBA_colour = glm::vec4(0.f, 1.f, 0.f, 1.f);
 				if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j }) == pathfinder->m_Graph.nodes.end()) {
 						pathfinder->CreatePathNode(Coord{ (int)i,(int)j }, glm::vec3(i, 5.f, j), i + j, pBlock);
 				}
 				pathfinder->m_StartNode = pathfinder->m_Graph.nodes[Coord{(int)i,(int)j}];
+				start = pBlock;
 			}
 			else if (navMap[i][j] == 'r')
 			{
-				pBlock->bUse_RGBA_colour = true;
 				pBlock->position = glm::vec3(i, 0.f, j);
+				pBlock->bUse_RGBA_colour = true;
 				pBlock->RGBA_colour = glm::vec4(1.f, 0.f, 0.f, 1.f);
 				if (pathfinder->m_Graph.nodes.find(Coord{ (int)i,(int)j }) == pathfinder->m_Graph.nodes.end()) {
 					pathfinder->CreatePathNode(Coord{ (int)i,(int)j }, glm::vec3(i, 5.f, j), i + j, pBlock);
 				}
 				pathfinder->m_EndNode = pathfinder->m_Graph.nodes[Coord{ (int)i,(int)j }];
+				end = pBlock;
 			}
 			pBlock->setRotationFromEuler(glm::vec3(0));
 			pBlock->isWireframe = false;
@@ -819,14 +829,15 @@ int main(int argc, char* argv[])
 
 	std::vector<PathNode*> path = pathfinder->AStarSearch(&pathfinder->m_Graph, pathfinder->m_StartNode, pathfinder->m_EndNode);
 	int ix = 0;
-	for (PathNode* p : path)
-	{
-		ix++;
-		std::cout << ix << ": " << p->coord.x << ", " << p->coord.y << std::endl;
-	}
+	//for (PathNode* p : path)
+	//{
+	//	ix++;
+	//	std::cout << ix << ": " << p->coord.x << ", " << p->coord.y << std::endl;
+	//}
 	int nodeCount = 0;
 	pBeholder->position = glm::vec3(path[0]->coord.x, 1.15f, path[0]->coord.y);
-	
+	start->RGBA_colour = glm::vec4(0.f, 1.f, 0.f, 1.f);
+	end->RGBA_colour = glm::vec4(1.f, 0.f, 0.f, 1.f);
 	while (!glfwWindowShouldClose(window))
 	{
 	/*	if (nodeCount < path.size() - 1)
@@ -843,7 +854,7 @@ int main(int argc, char* argv[])
 		{
 			pBeholder->position = glm::vec3(path[path.size() -1]->point.x, 1.15f, path[path.size() - 1]->point.y);
 		}*/
-		moveAlongPath(path, pBeholder, 0.1f);
+		moveAlongPath(path, pBeholder, SPEED);
 		::g_pTheLightManager->CopyLightInformationToShader(shaderID);
 		//	pBrain->Update(0.1f);
 		duration = (std::clock() - deltaTime) / (double)CLOCKS_PER_SEC;
@@ -1221,23 +1232,36 @@ void moveAlongPath(std::vector<PathNode*>& path, cMeshObject* agent, float speed
 	static int iNode = 0;
 	static bool moving = false;
 	static glm::vec3 targetPos;
+	static float distanceToNode = 0.f;
 
 	// Check if we're currently moving
 	if (moving) {
 		glm::vec3 direction = glm::normalize(targetPos - agent->position);
-		agent->position += direction * speed;
-		agent->qRotation = q_utils::RotateTowards(agent->qRotation, q_utils::LookAt(-direction, glm::vec3(0.f, 1.f, 0.f)), 3.14f * 0.05f);
-		// Check if we've reached the target position
-		if (glm::length(targetPos - agent->position) < 0.1f) {
-			moving = false;
+		float distanceMoved = speed * 1.1f;
+		agent->position += direction * distanceMoved;
+		distanceToNode -= distanceMoved;
+
+		// Check if we need to skip nodes
+		while (distanceToNode <= 0.f && iNode < path.size() - 1) {
 			iNode++;
+			targetPos = glm::vec3(path[iNode]->point.x, agent->position.y, path[iNode]->point.z);
+			distanceToNode += glm::distance(agent->position, targetPos);
+		}
+
+		agent->qRotation = q_utils::RotateTowards(agent->qRotation, q_utils::LookAt(-direction, glm::vec3(0.f, 1.f, 0.f)), 3.14f * 0.05f);
+
+		// Check if we've reached the target position
+		if (distanceToNode <= 0.f) {
+			moving = false;
 		}
 	}
 	else {
 		// Check if the path is empty
 		if (iNode < path.size() - 1) {
 			// Move towards next node
-			targetPos = glm::vec3(path[iNode + 1]->point.x, agent->position.y, path[iNode + 1]->point.z);
+			iNode++;
+			targetPos = glm::vec3(path[iNode]->point.x, agent->position.y, path[iNode]->point.z);
+			distanceToNode = glm::distance(agent->position, targetPos);
 			moving = true;
 		}
 		else {

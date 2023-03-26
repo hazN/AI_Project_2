@@ -92,7 +92,7 @@ std::vector<PathNode*> PathFinder::AStarSearch(Graph* graph, PathNode* start, Pa
     // Loop until end is found
     while (!open.empty())
     {
-        // Pop lowest f node
+        // Pop lowest distance node
         PathNode* curNode = open.top();
         open.pop();
 
@@ -103,15 +103,14 @@ std::vector<PathNode*> PathFinder::AStarSearch(Graph* graph, PathNode* start, Pa
             std::vector<PathNode*> rPath;
             while (curNode != nullptr)
             {
-                curNode->mesh->bUse_RGBA_colour = true;
-                curNode->mesh->RGBA_colour = glm::vec4(0.f, 0.f, 1.f, 1.f);
+                if (curNode != m_StartNode && curNode != m_EndNode)
+                {
+                    curNode->mesh->bUse_RGBA_colour = true;
+                    curNode->mesh->RGBA_colour = glm::vec4(0.f, 0.f, 1.f, 1.f);
+                }
                 rPath.push_back(curNode);
                 curNode = curNode->parent;
             }
-            // Reset start/finish colours incase they got changed
-           // m_StartNode->mesh->RGBA_colour = glm::vec4(0.f, 1.f, 0.f, 1.f);
-           //// m_StartNode->mesh->RGBA_colour = glm::vec4(0.f, 1.f, 0.f, 1.f);
-           // m_EndNode->mesh->RGBA_colour = glm::vec4(1.f, 0.f, 0.f, 1.f);
             // Reverse the order so it's start to finish
             std::vector<PathNode*> path(rPath.rbegin(), rPath.rend());
             return path;
@@ -144,6 +143,6 @@ std::vector<PathNode*> PathFinder::AStarSearch(Graph* graph, PathNode* start, Pa
         closed.emplace(curNode->coord, curNode);
     }
 
-    // Return an empty path if the end node is not found
+    // Return an empty path incase there is no end node
     return std::vector<PathNode*>();
 }
